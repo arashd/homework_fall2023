@@ -1,0 +1,12 @@
+swig
+mujoco
+gymnasium[box2d,classic_control]
+tensorboard
+tensorboardX
+matplotlib
+ipython
+moviepy
+pyvirtualdisplay
+torch
+opencv-python
+ipdb
