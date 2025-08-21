@@ -6,7 +6,7 @@ pip install uv
 
 for hw in hw1 hw2 hw3 hw4 hw5; do
 cd $hw
-uv venv "$hw-venv"
+uv venv "$hw-venv" -N
 source "$hw-venv/bin/activate"
 uv pip compile requirements.in -o requirements.txt
 uv pip install -r requirements.txt
