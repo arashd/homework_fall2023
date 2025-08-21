@@ -60,3 +60,12 @@ class ReplayBuffer(object):
                 [self.terminals, terminals]
             )[-self.max_size:]
 
+    def sample_random_data(self, batch_size):
+        """
+        Sample a random batch of data from the replay buffer.
+        """
+        if self.obs is None or batch_size > len(self.obs):
+            raise ValueError("Not enough data in replay buffer")
+        
+        indices = np.random.randint(0, len(self.obs), size=batch_size)
+        return self.obs[indices], self.acs[indices]
