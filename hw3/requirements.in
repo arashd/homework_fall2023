@@ -1,0 +1,15 @@
+mujoco
+gymnasium[classic_control,mujoco,atari,accept-rom-license]
+tensorboard
+tensorboardX
+matplotlib
+ipython
+moviepy
+pyvirtualdisplay
+torch
+opencv-python
+ipdb
+swig
+box2d-py
+tqdm
+pyyaml
