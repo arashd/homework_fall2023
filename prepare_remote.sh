@@ -4,11 +4,10 @@ sudo apt-get install build-essential swig  git
 # for each of the hw directories:
 pip install uv
 
-for hw in hw1 hw2 hw3 hw4 hw5; do
-cd $hw
-uv venv "$hw-venv" -N
-source "$hw-venv/bin/activate"
+cd "hw-3"
+yes n | uv venv "hw-3-venv"
+source "hw-3-venv/bin/activate"
 uv pip compile requirements.in -o requirements.txt
 uv pip install -r requirements.txt
 cd ..
-done
+
