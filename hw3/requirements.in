@@ -1,5 +1,5 @@
 mujoco
-gymnasium[classic_control,mujoco,atari,accept-rom-license]
+gymnasium[classic_control,mujoco,atari]
 tensorboard
 tensorboardX
 matplotlib

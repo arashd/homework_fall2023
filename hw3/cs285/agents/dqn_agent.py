@@ -80,10 +80,10 @@ class DQNAgent(nn.Module):
             
             target_values = reward + self.discount * next_q_values
 
-        # DONE(student): train the critic with the target values
+        # TODO(student): train the critic with the target values
         qa_values = self.critic(obs)
         q_values = torch.gather(qa_values, dim=1, index=action[:, None])
-        loss = self.critic_loss(q_values, target_values)
+        loss = self.critic_loss(q_values, target_values.squeeze())
 
 
         self.critic_optimizer.zero_grad()
@@ -117,7 +117,7 @@ class DQNAgent(nn.Module):
         """
         Update the DQN agent, including both the critic and target.
         """
-        # DONE(student): update the critic, and the target if needed
+        # TODO(student): update the critic, and the target if needed
 
         critic_stats = self.update_critic(obs, action, reward, next_obs, done)
 

@@ -94,14 +94,14 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
         if np.random.random() < epsilon:
             action = np.random.randint(0, env.action_space.n)
         else:
-            action = agent.target_critic(torch.from_numpy(observation)).argmax(dim=-1)
+            input_obs = ptu.from_numpy(observation).to(ptu.device)
+            action = agent.target_critic(input_obs).argmax(dim=-1).cpu()
             action = ptu.to_numpy(action)
 
         # DONE(student): Step the environment
         next_observation, reward, terminated, truncated, info = env.step(action)
 
         next_observation = np.asarray(next_observation)
-        done = terminated or truncated
 
         # TODO(student): Add the data to the replay buffer
         if isinstance(replay_buffer, MemoryEfficientReplayBuffer):
@@ -111,7 +111,7 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
                 action=action, 
                 reward=reward, 
                 next_observation=next_observation, 
-                done=done
+                done=terminated
             )
         else:
             # We're using the regular replay buffer
@@ -120,11 +120,11 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
                 action=action, 
                 reward=reward, 
                 next_observation=next_observation, 
-                done=done
+                done=terminated
             )
 
         # Handle episode termination
-        if done:
+        if terminated or truncated:
             reset_env_training()
 
             logger.log_scalar(info["episode"]["r"], "train_return", step)
