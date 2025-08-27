@@ -1,9 +1,7 @@
 import numpy as np
-import gym
-from gym import spaces
-from gym.wrappers.frame_stack import FrameStack
-from gym.wrappers.atari_preprocessing import AtariPreprocessing
-from gym.wrappers.record_episode_statistics import RecordEpisodeStatistics
+import gymnasium as gym
+from gymnasium import spaces
+from gymnasium.wrappers import FrameStackObservation, AtariPreprocessing, RecordEpisodeStatistics
 
 
 class FireResetEnv(gym.Wrapper):
@@ -49,5 +47,5 @@ def wrap_deepmind(env: gym.Env):
         terminal_on_life_loss=False,
         grayscale_obs=True,
     )
-    env = FrameStack(env, num_stack=4)
+    env = FrameStackObservation(env, stack_size=4)
     return env

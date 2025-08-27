@@ -81,6 +81,7 @@ class ReplayBuffer:
 class MemoryEfficientReplayBuffer:
     """
     A memory-efficient version of the replay buffer for when observations are stacked.
+
     """
 
     def __init__(self, frame_history_len: int, capacity=1000000):
@@ -219,7 +220,6 @@ class MemoryEfficientReplayBuffer:
 
         Use like:
             replay_buffer.insert(
-                observation=observation,
                 action=action,
                 reward=reward,
                 next_observation=next_observation,
