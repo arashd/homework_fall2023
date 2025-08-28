@@ -80,10 +80,10 @@ class DQNAgent(nn.Module):
             
             target_values = reward + self.discount * next_q_values
 
-        # TODO(student): train the critic with the target values
+        # DONE(student): train the critic with the target values
         qa_values = self.critic(obs)
         q_values = torch.gather(qa_values, dim=1, index=action[:, None])
-        loss = self.critic_loss(q_values, target_values.squeeze())
+        loss = self.critic_loss(q_values.squeeze(), target_values)
 
 
         self.critic_optimizer.zero_grad()
