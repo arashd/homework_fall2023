@@ -103,7 +103,7 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
 
         next_observation = np.asarray(next_observation)
 
-        # TODO(student): Add the data to the replay buffer
+        # DONE(student): Add the data to the replay buffer
         if isinstance(replay_buffer, MemoryEfficientReplayBuffer):
             # We're using the memory-efficient replay buffer,
             # so we only insert next_observation (not observation)
@@ -140,7 +140,7 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
             # Convert to PyTorch tensors
             batch = ptu.from_numpy(batch)
 
-            # TODO(student): Train the agent. `batch` is a dictionary of numpy arrays,
+            # DONE(student): Train the agent. `batch` is a dictionary of numpy arrays,
             batch = {
                 "obs": batch["observations"],
                 "next_obs": batch["next_observations"],
