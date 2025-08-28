@@ -54,7 +54,7 @@ def basic_dqn_config(
     )
 
     def make_env(render: bool = False):
-        return RecordEpisodeStatistics(gym.make(env_name))
+        return RecordEpisodeStatistics(gym.make(env_name, render_mode="rgb_array" if render else None))
 
     log_string = "{}_{}_s{}_l{}_d{}".format(
         exp_name or "dqn",
