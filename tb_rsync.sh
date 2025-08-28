@@ -10,12 +10,20 @@ LOCAL_DIR=$(mktemp -d -t tb_rsync.XXXXXX)
 echo "Mirroring ${REMOTE_HOST}:${REMOTE_LOGDIR} → $LOCAL_DIR"
 echo "TensorBoard available at http://localhost:6006"
 
-# keep syncing in the background
-while true; do
-  echo "Syncing from ${REMOTE_HOST}:${REMOTE_LOGDIR} to $LOCAL_DIR"
-  rsync -az --delete "${REMOTE_HOST}:${REMOTE_LOGDIR}/" "$LOCAL_DIR"/
-  sleep 5
-done &
+# start sync loop in background
+(
+  while true; do
+    rsync -az --delete "${REMOTE_HOST}:${REMOTE_LOGDIR}/" "$LOCAL_DIR"/
+    sleep 5
+  done
+) &
+SYNC_PID=$!
+
+# ensure background loop is killed when script exits (Ctrl-C etc.)
+cleanup() {
+  kill $SYNC_PID 2>/dev/null
+}
+trap cleanup EXIT
 
 # run tensorboard on default port (6006)
 tensorboard --logdir "$LOCAL_DIR"
