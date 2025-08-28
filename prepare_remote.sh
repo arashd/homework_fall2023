@@ -1,8 +1,8 @@
-# take one argument: the hw number (1, 2, 3), then do the pip compile and install there.
+# take a single argument: the hw number (1, 2, 3), then do the pip compile and install there.
 
 # check if the arguments are provided
-if [ $# -ne 2 ]; then
-    echo "Usage: $0 <hw_number> <remote_name>"
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <hw_number>" 
     exit 1
 fi
 
