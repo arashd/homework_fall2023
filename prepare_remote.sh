@@ -1,4 +1,4 @@
-# take two arguments: the hw number (1, 2, 3) and the remote name, then do the pip compile and install there.
+# take one argument: the hw number (1, 2, 3), then do the pip compile and install there.
 
 # check if the arguments are provided
 if [ $# -ne 2 ]; then
