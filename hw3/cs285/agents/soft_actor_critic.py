@@ -186,13 +186,13 @@ class SoftActorCritic(nn.Module):
         # Compute target values
         # Important: we don't need gradients for target values!
         with torch.no_grad():
-            # TODO(student)
+            # DONE(student)
             # Sample from the actor
-            next_action_distribution: torch.distributions.Distribution = ...
-            next_action = ...
+            next_action_distribution: torch.distributions.Distribution = self.actor(next_obs)
+            next_action = next_action_distribution.sample()
 
             # Compute the next Q-values for the sampled actions
-            next_qs = ...
+            next_qs = self.critic(next_obs, next_action)
 
             # Handle Q-values from multiple different target critic networks (if necessary)
             # (For double-Q, clip-Q, etc.)
@@ -204,24 +204,24 @@ class SoftActorCritic(nn.Module):
             ), next_qs.shape
 
             if self.use_entropy_bonus and self.backup_entropy:
-                # TODO(student): Add entropy bonus to the target values for SAC
+                # DONE(student): Add entropy bonus to the target values for SAC
                 next_action_entropy = ...
                 next_qs += ...
 
             # Compute the target Q-value
-            target_values: torch.Tensor = ...
+            target_values: torch.Tensor = reward + (~done).float() * self.discount * next_qs
             assert target_values.shape == (
                 self.num_critic_networks,
                 batch_size
             )
 
-        # TODO(student): Update the critic
+        # DONE(student): Update the critic
         # Predict Q-values
-        q_values = ...
+        q_values = self.critic(obs, action)
         assert q_values.shape == (self.num_critic_networks, batch_size), q_values.shape
 
         # Compute loss
-        loss: torch.Tensor = ...
+        loss: torch.Tensor = self.critic_loss(q_values, target_values)
 
         self.critic_optimizer.zero_grad()
         loss.backward()
@@ -238,27 +238,35 @@ class SoftActorCritic(nn.Module):
         Compute the (approximate) entropy of the action distribution for each batch element.
         """
 
-        # TODO(student): Compute the entropy of the action distribution.
+        # DONE(student): Compute the entropy of the action distribution.
         # Note: Think about whether to use .rsample() or .sample() here...
-        return ...
+        num_samples = 1000
+        samples = action_distribution.rsample((num_samples,))
+        # print("action_distribution.batch_shape", action_distribution.batch_shape)
+        assert samples.shape == (num_samples, *action_distribution.batch_shape, *action_distribution.event_shape), samples.shape
+        
+        return action_distribution.log_prob(samples).mean(0)
+        
 
     def actor_loss_reinforce(self, obs: torch.Tensor):
         batch_size = obs.shape[0]
 
-        # TODO(student): Generate an action distribution
-        action_distribution: torch.distributions.Distribution = ...
+        # DONE(student): Generate an action distribution
+        action_distribution: torch.distributions.Distribution = self.actor(obs)
 
         with torch.no_grad():
-            # TODO(student): draw num_actor_samples samples from the action distribution for each batch element
-            action = ...
+            # DONE(student): draw num_actor_samples samples from the action distribution for each batch element
+            action = action_distribution.sample((self.num_actor_samples,))
             assert action.shape == (
                 self.num_actor_samples,
                 batch_size,
                 self.action_dim,
             ), action.shape
 
-            # TODO(student): Compute Q-values for the current state-action pair
-            q_values = ...
+            # print("action.shape", action.shape)
+
+            # DONE(student): Compute Q-values for the current state-action pair
+            q_values = self.critic(obs[None, ...], action)
             assert q_values.shape == (
                 self.num_critic_networks,
                 self.num_actor_samples,
@@ -270,9 +278,10 @@ class SoftActorCritic(nn.Module):
             advantage = q_values
 
         # Do REINFORCE: calculate log-probs and use the Q-values
-        # TODO(student)
-        log_probs = ...
-        loss = ...
+        # DONE(student)
+        log_probs = action_distribution.log_prob(action)
+        # print("log_probs aa:", log_probs.shape)
+        loss = (-log_probs * advantage).mean(dim=0)
 
         return loss, torch.mean(self.entropy(action_distribution))
 
@@ -303,10 +312,14 @@ class SoftActorCritic(nn.Module):
             loss, entropy = self.actor_loss_reparametrize(obs)
         elif self.actor_gradient_type == "reinforce":
             loss, entropy = self.actor_loss_reinforce(obs)
+            # print("loss.shape", loss.shape)
+            # print("entropy.shape", entropy.shape)
 
         # Add entropy if necessary
         if self.use_entropy_bonus:
             loss -= self.temperature * entropy
+        
+        loss = loss.sum()
 
         self.actor_optimizer.zero_grad()
         loss.backward()
@@ -340,16 +353,26 @@ class SoftActorCritic(nn.Module):
         """
 
         critic_infos = []
-        # TODO(student): Update the critic for num_critic_upates steps, and add the output stats to critic_infos
+        # DONE(student): Update the critic for num_critic_upates steps, and add the output stats to critic_infos
+        for _ in range(self.num_critic_updates):
+            critic_infos.append(self.update_critic(observations, actions, rewards, next_observations, dones))
 
-        # TODO(student): Update the actor
-        actor_info = ...
+        # DONE(student): Update the actor
+        actor_info = self.update_actor(observations)
 
-        # TODO(student): Perform either hard or soft target updates.
+        # DONE(student): Perform either hard or soft target updates.
         # Relevant variables:
         #  - step
         #  - self.target_update_period (None when using soft updates)
         #  - self.soft_target_update_rate (None when using hard updates)
+        
+        if self.target_update_period:
+            if step % self.target_update_period == 0:
+                self.update_target_critic()
+        elif self.soft_target_update_rate:
+            self.soft_update_target_critic(self.soft_target_update_rate)
+        else:
+            raise RuntimeError("must supply either soft_target_update_rate or target_update_period")
 
         # Average the critic info over all of the steps
         critic_info = {

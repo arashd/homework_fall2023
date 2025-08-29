@@ -1,6 +1,5 @@
 import os
 import time
-import yaml
 
 from cs285.agents.soft_actor_critic import SoftActorCritic
 from cs285.infrastructure.replay_buffer import ReplayBuffer
@@ -9,8 +8,8 @@ import cs285.env_configs
 import os
 import time
 
-import gym
-from gym import wrappers
+import gymnasium as gym
+from gymnasium import wrappers
 import numpy as np
 import torch
 from cs285.infrastructure import pytorch_util as ptu
@@ -67,20 +66,20 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
         if step < config["random_steps"]:
             action = env.action_space.sample()
         else:
-            # TODO(student): Select an action
-            action = ...
+            # DONE(student): Select an action
+            action = agent.get_action(observation)
 
         # Step the environment and add the data to the replay buffer
-        next_observation, reward, done, info = env.step(action)
+        next_observation, reward, terminated, truncated, info = env.step(action)
         replay_buffer.insert(
             observation=observation,
             action=action,
             reward=reward,
             next_observation=next_observation,
-            done=done and not info.get("TimeLimit.truncated", False),
+            done=terminated
         )
 
-        if done:
+        if terminated or truncated:
             logger.log_scalar(info["episode"]["r"], "train_return", step)
             logger.log_scalar(info["episode"]["l"], "train_ep_len", step)
             observation, _ = env.reset()
@@ -89,9 +88,10 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
 
         # Train the agent
         if step >= config["training_starts"]:
-            # TODO(student): Sample a batch of config["batch_size"] transitions from the replay buffer
-            batch = ...
-            update_info = ...
+            # DONE(student): Sample a batch of config["batch_size"] transitions from the replay buffer
+            batch = replay_buffer.sample(config["batch_size"])
+            batch = ptu.from_numpy(batch)
+            update_info = agent.update(**batch, step=step)
 
             # Logging
             update_info["actor_lr"] = agent.actor_lr_scheduler.get_last_lr()[0]
