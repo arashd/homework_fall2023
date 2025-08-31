@@ -23,7 +23,7 @@ from scripting_utils import make_logger, make_config
 import argparse
 
 
-def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
+def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace, debug: bool):
     # set random seeds
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -59,6 +59,7 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
         ob_shape,
         ac_dim,
         **config["agent_kwargs"],
+        debug=debug,
     )
 
     replay_buffer = ReplayBuffer(config["replay_buffer_capacity"])
@@ -158,6 +159,7 @@ def main():
     parser.add_argument("--no_gpu", "-ngpu", action="store_true")
     parser.add_argument("--which_gpu", "-g", default=0)
     parser.add_argument("--log_interval", type=int, default=1000)
+    parser.add_argument("--debug", action="store_true")
 
     args = parser.parse_args()
 
@@ -167,7 +169,7 @@ def main():
     config = make_config(args.config_file)
     logger = make_logger(logdir_prefix, config)
 
-    run_training_loop(config, logger, args)
+    run_training_loop(config, logger, args, debug=args.debug)
 
 
 if __name__ == "__main__":

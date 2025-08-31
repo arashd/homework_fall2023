@@ -43,6 +43,10 @@ class MLPPolicy(nn.Module):
         else:
             if self.state_dependent_std:
                 assert fixed_std is None
+
+                print("ac_dim", ac_dim)
+                print("making mlp with output size", 2*ac_dim)
+                
                 self.net = ptu.build_mlp(
                     input_size=ob_dim,
                     output_size=2*ac_dim,
