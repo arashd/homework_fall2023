@@ -12,6 +12,7 @@ pip install uv
 # install dependencies
 sudo apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 sudo apt-get install build-essential swig  git
+sudo apt-get install -y libgl1 libegl1 -y
 
 # for each of the hw directories:
 cd "hw$1"

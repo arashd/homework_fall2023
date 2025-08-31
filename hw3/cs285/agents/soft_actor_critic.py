@@ -209,7 +209,7 @@ class SoftActorCritic(nn.Module):
                 next_qs += next_action_entropy
 
             # Compute the target Q-value
-            target_values: torch.Tensor = reward + (~done).float() * self.discount * next_qs
+            target_values: torch.Tensor = (reward + (~done).float() * self.discount * next_qs).detach()
             assert target_values.shape == (
                 self.num_critic_networks,
                 batch_size
@@ -240,12 +240,10 @@ class SoftActorCritic(nn.Module):
 
         # DONE(student): Compute the entropy of the action distribution.
         # Note: Think about whether to use .rsample() or .sample() here...
-        num_samples = 100
-        samples = action_distribution.rsample((num_samples,))
+        samples = action_distribution.sample()
         # print("action_distribution.batch_shape", action_distribution.batch_shape)
-        assert samples.shape == (num_samples, *action_distribution.batch_shape, *action_distribution.event_shape), samples.shape
         
-        return - action_distribution.log_prob(samples).mean(0)
+        return - action_distribution.log_prob(samples)
         
 
     def actor_loss_reinforce(self, obs: torch.Tensor):
