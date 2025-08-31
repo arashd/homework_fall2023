@@ -22,3 +22,5 @@ source "hw$1-venv/bin/activate"
 uv pip compile requirements.in -o requirements.txt
 uv pip install -r requirements.txt
 source "hw$1-venv/bin/activate"
+
+export MUJOCO_GL="egl"
