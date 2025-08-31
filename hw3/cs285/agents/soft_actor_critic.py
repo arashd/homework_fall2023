@@ -209,7 +209,7 @@ class SoftActorCritic(nn.Module):
                 next_qs += next_action_entropy
 
             # Compute the target Q-value
-            target_values: torch.Tensor = (reward + (~done).float() * self.discount * next_qs).detach()
+            target_values: torch.Tensor = (reward + self.discount * next_qs).detach()
             assert target_values.shape == (
                 self.num_critic_networks,
                 batch_size
@@ -254,9 +254,9 @@ class SoftActorCritic(nn.Module):
 
         with torch.no_grad():
             # DONE(student): draw num_actor_samples samples from the action distribution for each batch element
-            action = action_distribution.sample((self.num_actor_samples,))
+            action = action_distribution.sample()
             assert action.shape == (
-                self.num_actor_samples,
+                # self.num_actor_samples,
                 batch_size,
                 self.action_dim,
             ), action.shape
@@ -274,18 +274,18 @@ class SoftActorCritic(nn.Module):
 
             # DONE(student): Compute Q-values for the current state-action pair
             q_values = self.critic(
-                obs.unsqueeze(0).expand(self.num_actor_samples, -1, -1).reshape(-1, obs.shape[-1]),
-                action.reshape(-1, self.action_dim)
-            ).reshape(self.num_critic_networks,self.num_actor_samples, batch_size)
+                obs,
+                action
+            )
 
             assert q_values.shape == (
                 self.num_critic_networks,
-                self.num_actor_samples,
+                # self.num_actor_samples,
                 batch_size,
             ), q_values.shape
 
             # Our best guess of the Q-values is the mean of the ensemble
-            q_values = torch.mean(q_values, axis=0)
+            # q_values = torch.mean(q_values, dim=0)
             advantage = q_values
 
             # advantage: (num_actor_samples, batch_size)
@@ -297,7 +297,7 @@ class SoftActorCritic(nn.Module):
         log_probs = action_distribution.log_prob(action)
         # print("log_probs.shape:", log_probs.shape)
         
-        loss = -(log_probs * advantage).mean(dim=0)
+        loss = - log_probs * advantage
 
         return loss, torch.mean(self.entropy(action_distribution))
 

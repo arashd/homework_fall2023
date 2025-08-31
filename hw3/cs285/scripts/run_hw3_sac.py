@@ -45,6 +45,9 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
     ob_shape = env.observation_space.shape
     ac_dim = env.action_space.shape[0]
 
+    print("ac_dim", ac_dim)
+    exit()
+
     # simulation timestep, will be used for video saving
     if "model" in dir(env):
         fps = 1 / env.model.opt.timestep

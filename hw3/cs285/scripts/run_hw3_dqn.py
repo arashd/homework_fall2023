@@ -31,6 +31,8 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
 
     # make the gym environment
     env = config["make_env"]()
+
+    
     eval_env = config["make_env"]()
     render_env = config["make_env"](render=True)
     exploration_schedule = config["exploration_schedule"]
@@ -197,6 +199,8 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
                     max_videos_to_save=args.num_render_trajectories,
                     video_title="eval_rollouts",
                 )
+
+                render_env.reset()
 
 
 def main():

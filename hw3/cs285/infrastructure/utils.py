@@ -34,15 +34,15 @@ def sample_trajectory(
                 cv2.resize(img, dsize=(250, 250), interpolation=cv2.INTER_CUBIC)
             )
 
-        # TODO use the most recent ob to decide what to do
+        # DONE use the most recent ob to decide what to do
         ac = policy.get_action(ob)
 
-        # TODO: take that action and get reward and next ob
+        # DONE: take that action and get reward and next ob
         next_ob, rew, terminated, truncated, info = env.step(ac)
 
         done = terminated or truncated
 
-        # TODO rollout can end due to done, or due to max_length
+        # DONE rollout can end due to done, or due to max_length
         steps += 1
         rollout_done = done or steps > max_length  # HINT: this is either 0 or 1
 
@@ -62,8 +62,6 @@ def sample_trajectory(
     episode_statistics = {"l": steps, "r": np.sum(rewards)}
     if "episode" in info:
         episode_statistics.update(info["episode"])
-
-    env.close()
 
     return {
         "observation": np.array(obs, dtype=np.float32),
