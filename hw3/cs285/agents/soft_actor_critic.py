@@ -338,15 +338,16 @@ class SoftActorCritic(nn.Module):
         # Sample from the actor
         action_distribution: torch.distributions.Distribution = self.actor(obs)
 
-        # TODO(student): Sample actions
+        # DONE(student): Sample actions
         # Note: Think about whether to use .rsample() or .sample() here...
-        action = ...
+        action = action_distribution.rsample()
 
-        # TODO(student): Compute Q-values for the sampled state-action pair
-        q_values = ...
+        # DONE(student): Compute Q-values for the sampled state-action pair
+        q_values = self.critic(obs, action)
 
-        # TODO(student): Compute the actor loss
-        loss = ...
+        # DONE(student): Compute the actor loss
+        q_values = torch.mean(q_values, dim=0)
+        loss = - q_values
 
         return loss, torch.mean(self.entropy(action_distribution))
 
